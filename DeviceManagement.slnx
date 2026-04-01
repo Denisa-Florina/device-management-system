@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/DeviceManagement.API/DeviceManagement.API.csproj" />
+    <Project Path="backend/DeviceManagement.Application/DeviceManagement.Application.csproj" />
+    <Project Path="backend/DeviceManagement.Domain/DeviceManagement.Domain.csproj" />
+    <Project Path="backend/DeviceManagement.Infrastructure/DeviceManagement.Infrastructure.csproj" />
+  </Folder>
+</Solution>

@@ -428,3 +428,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/backend/DeviceManagement.API/appsettings.Development.json
