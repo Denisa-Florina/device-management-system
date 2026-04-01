@@ -3,6 +3,18 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Enviorment
+!.env.example
+
+# Angular
+**/dist/
+.angular/
+*.env.local
+
+# Rider
+.idea/
+*.sln.iml
+
 # User-specific files
 *.rsuser
 *.suo
