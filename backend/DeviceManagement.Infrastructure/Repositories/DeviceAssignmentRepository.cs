@@ -40,4 +40,9 @@ public class DeviceAssignmentRepository(ApplicationDbContext context) : IDeviceA
         var deleted = await context.DeviceAssignments.Where(a => a.Id == id).ExecuteDeleteAsync();
         return deleted > 0;
     }
+
+	public async Task<DeviceAssignment?> GetCurrentAssignmentForDeviceAsync(int deviceId) =>
+        await context.DeviceAssignments
+            .Include(a => a.User)
+            .FirstOrDefaultAsync(a => a.DeviceId == deviceId && a.ReturnedDate == null);
 }
