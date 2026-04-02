@@ -9,5 +9,6 @@ public interface IDeviceAssignmentService
     Task<DeviceAssignmentDto?> ReturnDeviceAsync(int id);
     Task<bool> DeleteAsync(int id);
     
+    Task<DeviceAssignmentDto> AssignAsync(DeviceAssignmentRequestDto dto);
 
 }
