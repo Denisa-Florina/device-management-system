@@ -32,5 +32,23 @@ public class DeviceAssignmentService(IDeviceAssignmentRepository assignmentRepos
 
     public async Task<bool> DeleteAsync(int id) =>
         await assignmentRepository.DeleteAsync(id);
+    
+    public async Task<DeviceAssignmentDto> AssignAsync(DeviceAssignmentRequestDto dto)
+    {
+        var existing = await assignmentRepository.GetCurrentAssignmentForDeviceAsync(dto.DeviceId);
+        if (existing is not null)
+            throw new InvalidOperationException($"Device {dto.DeviceId} is already assigned to another user.");
 
+        _ = await deviceRepository.GetByIdAsync(dto.DeviceId)
+            ?? throw new KeyNotFoundException($"Device {dto.DeviceId} not found.");
+        _ = await userRepository.GetByIdAsync(dto.UserId)
+            ?? throw new KeyNotFoundException($"User {dto.UserId} not found.");
+
+        var assignment = mapper.Map<DeviceAssignment>(dto);
+        assignment.AssignedDate = DateTime.UtcNow;
+
+        var created = await assignmentRepository.CreateAsync(assignment);
+        var result = await assignmentRepository.GetByIdAsync(created.Id);
+        return mapper.Map<DeviceAssignmentDto>(result!);
+    }
 }
