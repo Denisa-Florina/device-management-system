@@ -10,4 +10,5 @@ public interface IDeviceAssignmentRepository
     Task<DeviceAssignment> UpdateAsync(DeviceAssignment assignment);
     Task<bool> DeleteAsync(int id);
 	Task<DeviceAssignment?> GetCurrentAssignmentForDeviceAsync(int deviceId);
+    Task<DeviceAssignment?> GetCurrentAssignmentForUserAsync(int userId);
 }
