@@ -6,7 +6,11 @@ using DeviceManagement.Domain.Interfaces;
 
 namespace DeviceManagement.Application.Services;
 
-public class DeviceAssignmentService(IDeviceAssignmentRepository assignmentRepository, IDeviceRepository deviceRepository, IUserRepository userRepository, IMapper mapper) : IDeviceAssignmentService
+public class DeviceAssignmentService(
+    IDeviceAssignmentRepository assignmentRepository,
+    IDeviceRepository deviceRepository,
+    IUserRepository userRepository,
+    IMapper mapper) : IDeviceAssignmentService
 {
     public async Task<IEnumerable<DeviceAssignmentDto>> GetAllAsync()
     {
@@ -20,19 +24,6 @@ public class DeviceAssignmentService(IDeviceAssignmentRepository assignmentRepos
         return assignment is null ? null : mapper.Map<DeviceAssignmentDto>(assignment);
     }
 
-    public async Task<DeviceAssignmentDto?> ReturnDeviceAsync(int id)
-    {
-        var assignment = await assignmentRepository.GetByIdAsync(id);
-        if (assignment is null) return null;
-
-        assignment.ReturnedDate = DateTime.UtcNow;
-        var updated = await assignmentRepository.UpdateAsync(assignment);
-        return mapper.Map<DeviceAssignmentDto>(updated);
-    }
-
-    public async Task<bool> DeleteAsync(int id) =>
-        await assignmentRepository.DeleteAsync(id);
-    
     public async Task<DeviceAssignmentDto> AssignAsync(DeviceAssignmentRequestDto dto)
     {
         var existing = await assignmentRepository.GetCurrentAssignmentForDeviceAsync(dto.DeviceId);
@@ -50,5 +41,45 @@ public class DeviceAssignmentService(IDeviceAssignmentRepository assignmentRepos
         var created = await assignmentRepository.CreateAsync(assignment);
         var result = await assignmentRepository.GetByIdAsync(created.Id);
         return mapper.Map<DeviceAssignmentDto>(result!);
+    }
+
+    public async Task<DeviceAssignmentDto?> ReturnDeviceAsync(int id)
+    {
+        var assignment = await assignmentRepository.GetByIdAsync(id);
+        if (assignment is null) return null;
+
+        assignment.ReturnedDate = DateTime.UtcNow;
+        var updated = await assignmentRepository.UpdateAsync(assignment);
+        return mapper.Map<DeviceAssignmentDto>(updated);
+    }
+
+    public async Task<bool> DeleteAsync(int id) =>
+        await assignmentRepository.DeleteAsync(id);
+
+    public async Task<bool> SelfAssignAsync(int deviceId, string location, int userId)
+    {
+        var existing = await assignmentRepository.GetCurrentAssignmentForDeviceAsync(deviceId);
+        if (existing is not null) return false;
+
+        var assignment = new DeviceAssignment
+        {
+            DeviceId = deviceId,
+            UserId = userId,
+            Location = location,
+            AssignedDate = DateTime.UtcNow
+        };
+
+        await assignmentRepository.CreateAsync(assignment);
+        return true;
+    }
+
+    public async Task<bool> SelfUnassignAsync(int userId)
+    {
+        var assignment = await assignmentRepository.GetCurrentAssignmentForUserAsync(userId);
+        if (assignment is null) return false;
+
+        assignment.ReturnedDate = DateTime.UtcNow;
+        await assignmentRepository.UpdateAsync(assignment);
+        return true;
     }
 }
