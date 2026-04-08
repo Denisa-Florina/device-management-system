@@ -45,4 +45,9 @@ public class DeviceAssignmentRepository(ApplicationDbContext context) : IDeviceA
         await context.DeviceAssignments
             .Include(a => a.User)
             .FirstOrDefaultAsync(a => a.DeviceId == deviceId && a.ReturnedDate == null);
+
+    public async Task<DeviceAssignment?> GetCurrentAssignmentForUserAsync(int userId) =>
+        await context.DeviceAssignments
+            .Include(a => a.Device)
+            .FirstOrDefaultAsync(a => a.UserId == userId && a.ReturnedDate == null);
 }

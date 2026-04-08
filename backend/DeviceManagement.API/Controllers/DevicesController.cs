@@ -1,12 +1,12 @@
 using DeviceManagement.Application.DTOs;
 using DeviceManagement.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagement.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class DevicesController(IDeviceService deviceService) : ControllerBase
+[Authorize]
+public class DevicesController(IDeviceService deviceService) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetAll() =>
@@ -20,6 +20,7 @@ public class DevicesController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] DeviceRequestDto dto)
     {
         var created = await deviceService.CreateAsync(dto);
@@ -27,6 +28,7 @@ public class DevicesController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] DeviceRequestDto dto)
     {
         var updated = await deviceService.UpdateAsync(id, dto);
@@ -34,6 +36,7 @@ public class DevicesController(IDeviceService deviceService) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await deviceService.DeleteAsync(id);

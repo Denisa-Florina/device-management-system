@@ -1,12 +1,13 @@
 using DeviceManagement.Application.DTOs;
+using DeviceManagement.Application.DTOs.Auth;
 using DeviceManagement.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagement.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class UsersController(IUserService userService) : ControllerBase
+[Authorize(Roles = "Admin")]
+public class UsersController(IUserService userService, IAuthService authService) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetAll() =>
@@ -20,10 +21,17 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] UserRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] AdminCreateUserRequestDto dto)
     {
-        var created = await userService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        try
+        {
+            var created = await authService.AdminCreateUserAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]
