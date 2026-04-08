@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagement.API.Controllers;
 
-
-public class DeviceAssignmentsController(IDeviceAssignmentService assignmentService) : BaseController
+[ApiController]
+[Route("api/[controller]")]
+public class DeviceAssignmentsController(IDeviceAssignmentService assignmentService) : ControllerBase
 {
     [HttpGet]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll() =>
         Ok(await assignmentService.GetAllAsync());
 
