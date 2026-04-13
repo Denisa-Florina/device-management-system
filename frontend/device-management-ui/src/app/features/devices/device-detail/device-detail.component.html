@@ -1,0 +1,114 @@
+<div class="page-container">
+  <div class="page-header">
+    <button class="btn btn-secondary btn-back" (click)="goBack()">&#8592; Back to Devices</button>
+    @if (device) {
+      <div class="header-actions">
+        @if (authService.isAdmin()) {
+          <a [routerLink]="['/devices', device.id, 'edit']" class="btn btn-secondary">Edit</a>
+          <button class="btn btn-danger" (click)="deleteDevice()">Delete</button>
+        } @else {
+          @if (device.isAvailable) {
+            <button class="btn btn-primary" (click)="assignDevice()">Assign to Me</button>
+          } @else if (isMyDevice()) {
+            <button class="btn btn-warning" (click)="unassignDevice()">Unassign</button>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  @if (actionMessage) {
+    <div class="alert alert-success">{{ actionMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading device...</p>
+    </div>
+  } @else if (device) {
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="device-title">
+          <h2>{{ device.name }}</h2>
+          <span class="device-manufacturer">by {{ device.manufacturer }}</span>
+        </div>
+        @if (device.isAvailable) {
+          <span class="status-badge status-available">Available</span>
+        } @else {
+          <span class="status-badge status-in-use">
+            In Use@if (device.currentUserName) { by {{ device.currentUserName }}}
+          </span>
+        }
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-section">
+          <h3>Device Information</h3>
+          <dl class="detail-list">
+            <div class="detail-row">
+              <dt>Type</dt>
+              <dd>{{ device.type }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Manufacturer</dt>
+              <dd>{{ device.manufacturer }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Operating System</dt>
+              <dd>{{ device.operatingSystem }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>OS Version</dt>
+              <dd>{{ device.osVersion }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="detail-section">
+          <h3>Hardware Specs</h3>
+          <dl class="detail-list">
+            <div class="detail-row">
+              <dt>Processor</dt>
+              <dd>{{ device.processor }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>RAM</dt>
+              <dd>{{ device.ram }} GB</dd>
+            </div>
+          </dl>
+        </div>
+
+        @if (!device.isAvailable) {
+          <div class="detail-section">
+            <h3>Assignment Info</h3>
+            <dl class="detail-list">
+              @if (device.currentUserName) {
+                <div class="detail-row">
+                  <dt>Assigned To</dt>
+                  <dd>{{ device.currentUserName }}</dd>
+                </div>
+              }
+              @if (device.currentLocation) {
+                <div class="detail-row">
+                  <dt>Location</dt>
+                  <dd>{{ device.currentLocation }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+        }
+
+        @if (device.description) {
+          <div class="detail-section detail-section-full">
+            <h3>Description</h3>
+            <p class="description-text">{{ device.description }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

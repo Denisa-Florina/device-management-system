@@ -1,0 +1,104 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Devices</h2>
+    @if (authService.isAdmin()) {
+      <a routerLink="/devices/new" class="btn btn-primary">+ Add Device</a>
+    }
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">&#128269;</span>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search by name, manufacturer, processor or RAM…"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="onSearchChange($event)"
+    />
+    @if (searchQuery) {
+      <button class="search-clear" (click)="clearSearch()" aria-label="Clear search">&#10005;</button>
+    }
+  </div>
+
+  @if (actionMessage) {
+    <div class="alert alert-success">{{ actionMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading devices...</p>
+    </div>
+  } @else if (devices.length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">&#128241;</span>
+      <p>No devices found.</p>
+      @if (authService.isAdmin()) {
+        <a routerLink="/devices/new" class="btn btn-primary">Add your first device</a>
+      }
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="device-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Manufacturer</th>
+            <th>Type</th>
+            <th>OS</th>
+            <th>RAM</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (device of devices; track device.id) {
+            <tr (click)="goToDetail(device.id)" class="clickable-row">
+              <td class="device-name">{{ device.name }}</td>
+              <td>{{ device.manufacturer }}</td>
+              <td>{{ device.type }}</td>
+              <td>{{ device.operatingSystem }} {{ device.osVersion }}</td>
+              <td>{{ device.ram }} GB</td>
+              <td>
+                @if (device.isAvailable) {
+                  <span class="status-badge status-available">Available</span>
+                } @else {
+                  <span class="status-badge status-in-use">
+                    In Use@if (device.currentUserName) { by {{ device.currentUserName }}}
+                  </span>
+                }
+              </td>
+              <td class="actions-cell" (click)="$event.stopPropagation()">
+                @if (authService.isAdmin()) {
+                  <a
+                    [routerLink]="['/devices', device.id, 'edit']"
+                    class="btn btn-sm btn-secondary"
+                  >Edit</a>
+                  <button
+                    class="btn btn-sm btn-danger"
+                    (click)="deleteDevice(device.id, $event)"
+                  >Delete</button>
+                } @else {
+                  @if (device.isAvailable) {
+                    <button
+                      class="btn btn-sm btn-primary"
+                      (click)="assignDevice(device, $event)"
+                    >Assign</button>
+                  } @else if (isMyDevice(device)) {
+                    <button
+                      class="btn btn-sm btn-warning"
+                      (click)="unassignDevice(device, $event)"
+                    >Unassign</button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
