@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagement.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class DeviceAssignmentsController(IDeviceAssignmentService assignmentService) : ControllerBase
+public class DeviceAssignmentsController(IDeviceAssignmentService assignmentService) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetAll() =>
