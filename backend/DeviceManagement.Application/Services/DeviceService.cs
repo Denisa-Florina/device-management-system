@@ -30,7 +30,7 @@ public class DeviceService(IDeviceRepository deviceRepository, IDeviceAssignment
         foreach (var device in devices)
         {
             var dto = await MapToDto(device);
-            // Only include available devices and the device assigned to this user
+
             if (dto.IsAvailable || dto.CurrentUserId == userId)
                 result.Add(dto);
         }
@@ -90,8 +90,7 @@ public class DeviceService(IDeviceRepository deviceRepository, IDeviceAssignment
         foreach (var device in devices)
         {
             var dto = await MapToDto(device);
-
-            // If scoped to a user: only available + their own device
+            
             if (userId.HasValue && !dto.IsAvailable && dto.CurrentUserId != userId.Value)
                 continue;
 
@@ -133,21 +132,21 @@ public class DeviceService(IDeviceRepository deviceRepository, IDeviceAssignment
         var score = 0;
         foreach (var token in tokens)
         {
-            // Name scoring: 16 (full match) / 12 (word match) / 8 (substring)
+
             if (nameFull == token)                    score += 16;
             else if (nameWords.Contains(token))       score += 12;
             else if (nameFull.Contains(token))        score += 8;
 
-            // Manufacturer scoring: 10 / 8 / 4
+
             if (manuFull == token)                    score += 10;
             else if (manuWords.Contains(token))       score += 8;
             else if (manuFull.Contains(token))        score += 4;
 
-            // Processor scoring: 4 (word) / 2 (substring)
+
             if (procWords.Contains(token))            score += 4;
             else if (procFull.Contains(token))        score += 2;
 
-            // RAM scoring: 3 for exact value or "{n}gb"
+
             if (token == ramStr || token == ramStr + "gb") score += 3;
         }
         return score;
