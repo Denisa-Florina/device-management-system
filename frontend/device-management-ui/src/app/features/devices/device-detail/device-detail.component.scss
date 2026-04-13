@@ -1,0 +1,121 @@
+.page-container {
+  padding: 2rem 2.25rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+
+.detail-card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.75rem 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  .device-title {
+    h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      letter-spacing: -0.025em;
+    }
+
+    .device-manufacturer {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+  }
+}
+
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+
+  .detail-section {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+
+    &:last-child { border-bottom: none; }
+
+    &.detail-section-full {
+      grid-column: 1 / -1;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    h3 {
+      margin: 0 0 1rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+  }
+}
+
+.detail-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+
+    &:last-child { border-bottom: none; }
+
+    dt {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      margin-right: 1rem;
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+      font-size: 0.875rem;
+      letter-spacing: -0.005em;
+    }
+  }
+}
+
+.description-text {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 0.9rem;
+}

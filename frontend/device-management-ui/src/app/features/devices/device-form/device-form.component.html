@@ -1,0 +1,162 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>{{ isEditMode ? 'Edit Device' : 'Add New Device' }}</h2>
+  </div>
+
+  @if (loadingData) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading device data...</p>
+    </div>
+  } @else {
+    <div class="form-card">
+      @if (errorMessage) {
+        <div class="alert alert-error">{{ errorMessage }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="name">Device Name <span class="required">*</span></label>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder="e.g. Samsung Galaxy S24"
+              [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+            />
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+              <span class="field-error">Device name is required.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="manufacturer">Manufacturer <span class="required">*</span></label>
+            <input
+              id="manufacturer"
+              type="text"
+              formControlName="manufacturer"
+              placeholder="e.g. Samsung"
+              [class.invalid]="form.get('manufacturer')?.invalid && form.get('manufacturer')?.touched"
+            />
+            @if (form.get('manufacturer')?.invalid && form.get('manufacturer')?.touched) {
+              <span class="field-error">Manufacturer is required.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="type">Type <span class="required">*</span></label>
+            <select
+              id="type"
+              formControlName="type"
+              [class.invalid]="form.get('type')?.invalid && form.get('type')?.touched"
+            >
+              <option [value]="0">Phone</option>
+              <option [value]="1">Tablet</option>
+            </select>
+            @if (form.get('type')?.invalid && form.get('type')?.touched) {
+              <span class="field-error">Type is required.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="operatingSystem">Operating System <span class="required">*</span></label>
+            <input
+              id="operatingSystem"
+              type="text"
+              formControlName="operatingSystem"
+              placeholder="e.g. Android"
+              [class.invalid]="form.get('operatingSystem')?.invalid && form.get('operatingSystem')?.touched"
+            />
+            @if (form.get('operatingSystem')?.invalid && form.get('operatingSystem')?.touched) {
+              <span class="field-error">Operating system is required.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="osVersion">OS Version <span class="required">*</span></label>
+            <input
+              id="osVersion"
+              type="text"
+              formControlName="osVersion"
+              placeholder="e.g. 14.0"
+              [class.invalid]="form.get('osVersion')?.invalid && form.get('osVersion')?.touched"
+            />
+            @if (form.get('osVersion')?.invalid && form.get('osVersion')?.touched) {
+              <span class="field-error">OS version is required.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="processor">Processor <span class="required">*</span></label>
+            <input
+              id="processor"
+              type="text"
+              formControlName="processor"
+              placeholder="e.g. Snapdragon 8 Gen 3"
+              [class.invalid]="form.get('processor')?.invalid && form.get('processor')?.touched"
+            />
+            @if (form.get('processor')?.invalid && form.get('processor')?.touched) {
+              <span class="field-error">Processor is required.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="ram">RAM (GB) <span class="required">*</span></label>
+            <input
+              id="ram"
+              type="number"
+              formControlName="ram"
+              placeholder="e.g. 8"
+              min="1"
+              [class.invalid]="form.get('ram')?.invalid && form.get('ram')?.touched"
+            />
+            @if (form.get('ram')?.invalid && form.get('ram')?.touched) {
+              <span class="field-error">
+                @if (form.get('ram')?.errors?.['required']) { RAM is required. }
+                @else if (form.get('ram')?.errors?.['min']) { RAM must be at least 1 GB. }
+              </span>
+            }
+          </div>
+
+          <div class="form-group form-group-full">
+            <div class="description-header">
+              <label for="description">Description <span class="optional">(optional)</span></label>
+              <button
+                type="button"
+                class="btn btn-ai"
+                (click)="generateDescription()"
+                [disabled]="generatingDescription"
+              >
+                @if (generatingDescription) {
+                  Generating...
+                } @else {
+                  AI Generate
+                }
+              </button>
+            </div>
+            <textarea
+              id="description"
+              formControlName="description"
+              placeholder="Additional notes about the device..."
+              rows="4"
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            @if (loading) {
+              {{ isEditMode ? 'Saving...' : 'Creating...' }}
+            } @else {
+              {{ isEditMode ? 'Save Changes' : 'Create Device' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

@@ -64,6 +64,14 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthService, AuthService>();
 
+        services.AddHttpClient<IAIDescriptionService, OllamaDescriptionService>((sp, client) =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var baseUrl = config["Ollama:BaseUrl"] ?? "http://localhost:11434";
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(120);
+        });
+
         return services;
     }
 }

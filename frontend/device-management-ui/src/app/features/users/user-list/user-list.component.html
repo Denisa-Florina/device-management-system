@@ -1,0 +1,64 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Users</h2>
+    <a routerLink="/users/new" class="btn btn-primary">+ Add User</a>
+  </div>
+
+  @if (actionMessage) {
+    <div class="alert alert-success">{{ actionMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading users...</p>
+    </div>
+  } @else if (users.length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">&#128100;</span>
+      <p>No users found.</p>
+      <a routerLink="/users/new" class="btn btn-primary">Add first user</a>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Location</th>
+            <th>Current Device</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users; track user.id) {
+            <tr (click)="goToEdit(user.id)" class="clickable-row">
+              <td class="user-name">{{ user.name }}</td>
+              <td>
+                <span class="role-badge" [class.role-admin]="user.role === 'Admin'" [class.role-customer]="user.role !== 'Admin'">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="text-secondary">{{ user.location }}</td>
+              <td>
+                @if (user.currentDeviceName) {
+                  <span class="device-chip">{{ user.currentDeviceName }}</span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td class="actions-cell" (click)="$event.stopPropagation()">
+                <a [routerLink]="['/users', user.id, 'edit']" class="btn btn-sm btn-secondary">Edit</a>
+                <button class="btn btn-sm btn-danger" (click)="deleteUser(user, $event)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

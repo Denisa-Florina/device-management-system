@@ -10,5 +10,22 @@ services:
     volumes:
       - sqldata:/var/lib/mssql/data
 
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  ollama-pull:
+    image: ollama/ollama
+    depends_on:
+      - ollama
+    entrypoint: >
+      sh -c "sleep 5 && ollama pull llama3.2"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+
 volumes:
   sqldata:
+  ollama_data:

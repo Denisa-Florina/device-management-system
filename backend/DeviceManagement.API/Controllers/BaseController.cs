@@ -11,4 +11,7 @@ public abstract class BaseController : ControllerBase
         var claim = User.FindFirst("userId")?.Value;
         return int.TryParse(claim, out var id) ? id : null;
     }
+
+    protected bool IsAdmin() =>
+        User.IsInRole("Admin");
 }

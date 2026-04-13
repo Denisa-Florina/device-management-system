@@ -12,6 +12,7 @@ public class DeviceDto
     public int RAM { get; set; }
     public string? Description { get; set; }
     public bool IsAvailable { get; set; }
+    public int? CurrentUserId { get; set; }
     public string? CurrentUserName { get; set; }
     public string? CurrentLocation { get; set; }
 }
