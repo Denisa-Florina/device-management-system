@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using AutoMapper;
 using DeviceManagement.Application.DTOs;
 using DeviceManagement.Application.Services.Interfaces;
@@ -15,12 +16,23 @@ public class DeviceService(IDeviceRepository deviceRepository, IDeviceAssignment
 
         foreach (var device in devices)
         {
-            var current = await assignmentRepository.GetCurrentAssignmentForDeviceAsync(device.Id);
-            var dto = mapper.Map<DeviceDto>(device);
-            dto.IsAvailable = current is null;
-            dto.CurrentUserName = current?.User?.Name;
-            dto.CurrentLocation = current?.Location;
-            result.Add(dto);
+            result.Add(await MapToDto(device));
+        }
+
+        return result;
+    }
+
+    public async Task<IEnumerable<DeviceDto>> GetForUserAsync(int userId)
+    {
+        var devices = await deviceRepository.GetAllAsync();
+        var result = new List<DeviceDto>();
+
+        foreach (var device in devices)
+        {
+            var dto = await MapToDto(device);
+            // Only include available devices and the device assigned to this user
+            if (dto.IsAvailable || dto.CurrentUserId == userId)
+                result.Add(dto);
         }
 
         return result;
@@ -31,9 +43,15 @@ public class DeviceService(IDeviceRepository deviceRepository, IDeviceAssignment
         var device = await deviceRepository.GetByIdAsync(id);
         if (device is null) return null;
 
-        var current = await assignmentRepository.GetCurrentAssignmentForDeviceAsync(id);
+        return await MapToDto(device);
+    }
+
+    private async Task<DeviceDto> MapToDto(Device device)
+    {
+        var current = await assignmentRepository.GetCurrentAssignmentForDeviceAsync(device.Id);
         var dto = mapper.Map<DeviceDto>(device);
         dto.IsAvailable = current is null;
+        dto.CurrentUserId = current?.UserId;
         dto.CurrentUserName = current?.User?.Name;
         dto.CurrentLocation = current?.Location;
         return dto;
@@ -55,14 +73,83 @@ public class DeviceService(IDeviceRepository deviceRepository, IDeviceAssignment
 
         mapper.Map(dto, device);
         var updated = await deviceRepository.UpdateAsync(device);
-        var current = await assignmentRepository.GetCurrentAssignmentForDeviceAsync(id);
-        var result = mapper.Map<DeviceDto>(updated);
-        result.IsAvailable = current is null;
-        result.CurrentUserName = current?.User?.Name;
-        result.CurrentLocation = current?.Location;
-        return result;
+        return await MapToDto(updated);
     }
 
     public async Task<bool> DeleteAsync(int id) =>
         await deviceRepository.DeleteAsync(id);
+
+    public async Task<IEnumerable<DeviceDto>> SearchAsync(string query, int? userId = null)
+    {
+        var tokens = TokenizeQuery(query);
+        if (tokens.Length == 0) return [];
+
+        var devices = await deviceRepository.GetAllAsync();
+        var scored = new List<(DeviceDto dto, int score)>();
+
+        foreach (var device in devices)
+        {
+            var dto = await MapToDto(device);
+
+            // If scoped to a user: only available + their own device
+            if (userId.HasValue && !dto.IsAvailable && dto.CurrentUserId != userId.Value)
+                continue;
+
+            var score = ComputeScore(device, tokens);
+            if (score > 0)
+                scored.Add((dto, score));
+        }
+
+        return scored
+            .OrderByDescending(x => x.score)
+            .Select(x => x.dto);
+    }
+
+    private static string[] TokenizeQuery(string query)
+    {
+        var clean = Regex.Replace(query.ToLowerInvariant(), @"[^a-z0-9\s]", " ");
+        var collapsed = Regex.Replace(clean, @"\s+", " ").Trim();
+        return collapsed
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(t => t.Length >= 1)
+            .Distinct()
+            .ToArray();
+    }
+
+    private static string NormalizeText(string? text) =>
+        text is null ? string.Empty : Regex.Replace(text.ToLowerInvariant(), @"\s+", " ").Trim();
+
+    private static int ComputeScore(Device device, string[] tokens)
+    {
+        var nameFull  = NormalizeText(device.Name);
+        var manuFull  = NormalizeText(device.Manufacturer);
+        var procFull  = NormalizeText(device.Processor);
+        var ramStr    = device.RAM.ToString();
+
+        var nameWords = nameFull.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var manuWords = manuFull.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var procWords = procFull.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        var score = 0;
+        foreach (var token in tokens)
+        {
+            // Name scoring: 16 (full match) / 12 (word match) / 8 (substring)
+            if (nameFull == token)                    score += 16;
+            else if (nameWords.Contains(token))       score += 12;
+            else if (nameFull.Contains(token))        score += 8;
+
+            // Manufacturer scoring: 10 / 8 / 4
+            if (manuFull == token)                    score += 10;
+            else if (manuWords.Contains(token))       score += 8;
+            else if (manuFull.Contains(token))        score += 4;
+
+            // Processor scoring: 4 (word) / 2 (substring)
+            if (procWords.Contains(token))            score += 4;
+            else if (procFull.Contains(token))        score += 2;
+
+            // RAM scoring: 3 for exact value or "{n}gb"
+            if (token == ramStr || token == ramStr + "gb") score += 3;
+        }
+        return score;
+    }
 }
