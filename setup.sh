@@ -13,6 +13,12 @@ if [ -n "$missing" ]; then
     exit 1
 fi
 
+if ! docker info >/dev/null 2>&1; then
+    echo "Docker is not running. Please start Docker Desktop and try again."
+    exit 1
+fi
+echo "[OK] Docker is running"
+
 if [ ! -f .env ]; then
     cp .env.example .env
     sed -i 's/YOUR_STRONG_PASSWORD_HERE/DevMgmt_Pass123!/' .env

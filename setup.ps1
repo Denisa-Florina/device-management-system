@@ -11,6 +11,13 @@ if ($missing.Count -gt 0) {
     exit 1
 }
 
+$dockerInfo = docker info 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Docker Desktop is not running. Please start it and try again." -ForegroundColor Red
+    exit 1
+}
+Write-Host "[OK] Docker Desktop is running" -ForegroundColor Green
+
 if (-not (Test-Path .env)) {
     Copy-Item .env.example .env
     (Get-Content .env) -replace 'YOUR_STRONG_PASSWORD_HERE', 'DevMgmt_Pass123!' | Set-Content .env
